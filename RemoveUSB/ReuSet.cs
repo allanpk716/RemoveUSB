@@ -26,6 +26,9 @@ namespace RemoveUSB
 
         public List<Result> Query(string query)
         {
+            // 清除之前的查询列表
+            _reuList.Clear();
+
             // 获取 U盘的盘符信息
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
