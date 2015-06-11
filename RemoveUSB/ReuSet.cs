@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using UsbEject;
 using Wox.Plugin;
 using Yeylol.UsbEject;
@@ -26,7 +27,6 @@ namespace RemoveUSB
 
         public List<Result> Query(string query)
         {
-            // 清除之前的查询列表
             _reuList.Clear();
 
             // 获取 U盘的盘符信息
@@ -89,10 +89,9 @@ namespace RemoveUSB
                 IcoPath = _pluginDirectory + "\\Images\\" + "usb_stick.png",
                 Action = (c) =>
                 {
-                    foreach (var item in _reuList)
-	                {
-                        RemoveUSB(item.strUSBSerialNumber);
-	                }
+                    Thread thread = new Thread(new ThreadStart(() => ProcessAllThread()));
+                    thread.Start();
+
                     // 返回false告诉Wox不要隐藏查询窗体，返回true则会自动隐藏Wox查询窗口
                     return true;
                 }
@@ -108,7 +107,9 @@ namespace RemoveUSB
                     IcoPath = _pluginDirectory + "\\Images\\" + "usb_stick.png",
                     Action = (c) =>
                     {
-                        RemoveUSB(item.strUSBSerialNumber);
+                        Thread t = new Thread(new ParameterizedThreadStart(ProcessOneThread));
+                        t.Start(item.strUSBSerialNumber); 
+
                         // 返回false告诉Wox不要隐藏查询窗体，返回true则会自动隐藏Wox查询窗口
                         return true;
                     }
@@ -141,6 +142,20 @@ namespace RemoveUSB
                     item.Eject(true);
                 }
             }
+        }
+
+        private void ProcessAllThread()
+        {
+            foreach (var item in _reuList)
+            {
+                RemoveUSB(item.strUSBSerialNumber);
+            }
+        }
+
+        private void ProcessOneThread(object objStr)
+        {
+            string strTmp = objStr.ToString();
+            RemoveUSB(strTmp);
         }
     }
 }
