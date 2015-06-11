@@ -1,0 +1,12 @@
+{
+    "ID":"164401726DC3442A91FE555819832A79",
+    "ActionKeyword":"reu",
+    "Name":"Remove USB",
+    "Description":"Remove USB",
+    "Author":"Chin allan",
+    "Version":"1.0.1",
+    "Language":"csharp",
+    "Website":"https://github.com/qianlifeng/Wox.Plugin.Doc",
+	"IcoPath":"Images\\usb_stick.png",
+    "ExecuteFileName":"RemoveUSB.dll"
+}
