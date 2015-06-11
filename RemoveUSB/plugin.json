@@ -6,7 +6,7 @@
     "Author":"Chin allan",
     "Version":"1.0.1",
     "Language":"csharp",
-    "Website":"https://github.com/qianlifeng/Wox.Plugin.Doc",
+    "Website":"https://github.com/allanpk716/RemoveUSB",
 	"IcoPath":"Images\\usb_stick.png",
     "ExecuteFileName":"RemoveUSB.dll"
 }

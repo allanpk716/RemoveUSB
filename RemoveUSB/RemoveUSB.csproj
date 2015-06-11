@@ -7,10 +7,11 @@
     <ProjectGuid>{F7B8B842-4102-466D-954B-BF05C255D9E2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Wox.Plugin.Reu</RootNamespace>
-    <AssemblyName>Wox.Plugin.Reu</AssemblyName>
+    <RootNamespace>RemoveUSB</RootNamespace>
+    <AssemblyName>RemoveUSB</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

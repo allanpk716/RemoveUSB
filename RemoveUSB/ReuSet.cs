@@ -48,6 +48,24 @@ namespace RemoveUSB
 
             List<Result> results = new List<Result>();
 
+            // 如果没有可移除移动设备的时候，那么就提示没有
+            if (_reuList.Count == 0)
+            {
+                results.Add(new Result
+                {
+                    Title = "Do not find any USB devices to remove",
+                    SubTitle = string.Empty,
+                    IcoPath = _pluginDirectory + "\\Images\\" + "usb_stick.png",
+                    Action = (c) =>
+                    {
+                        // 返回false告诉Wox不要隐藏查询窗体，返回true则会自动隐藏Wox查询窗口
+                        return true;
+                    }
+                });
+
+                return results;
+            }
+
             // 所有可移除设备的盘符拼接起来
             string strAllDevice = string.Empty;
             for (int i = 0; i < _reuList.Count; i++)
