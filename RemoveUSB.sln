@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoveUSB", "RemoveUSB\Remo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsbEject", "UsbEject\UsbEject.csproj", "{E1CCAEDD-96AB-4DE0-ADD2-89F43AA65C1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoveUSBTests", "RemoveUSBTests\RemoveUSBTests.csproj", "{64119829-176F-4889-9EB0-066E55E5F18A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E1CCAEDD-96AB-4DE0-ADD2-89F43AA65C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1CCAEDD-96AB-4DE0-ADD2-89F43AA65C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1CCAEDD-96AB-4DE0-ADD2-89F43AA65C1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64119829-176F-4889-9EB0-066E55E5F18A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64119829-176F-4889-9EB0-066E55E5F18A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64119829-176F-4889-9EB0-066E55E5F18A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64119829-176F-4889-9EB0-066E55E5F18A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

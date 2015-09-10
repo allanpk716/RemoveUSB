@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Text;
 using System.Threading;
 using UsbEject;
@@ -29,12 +30,24 @@ namespace RemoveUSB
         {
             _reuList.Clear();
 
+            // 找到移动硬盘设备
+            var UsbNameList = GetAllUsbDriveNames();
+
             // 获取 U盘的盘符信息
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
             foreach (var item in allDrives)
             {
-                if (item.DriveType == DriveType.Removable && item.IsReady == true)
+                // 如果匹配上就标记出来
+                bool bIsUsb = false;
+                if (UsbNameList.Contains(item.Name.Substring(0, 2)))
+                {
+                    bIsUsb = true;
+                }
+
+                if (item.DriveType == DriveType.Removable && item.IsReady == true ||
+                    item.DriveType == DriveType.Fixed && bIsUsb == true
+                    )
                 {
                     // 得到更目录的盘符字母
                     string strPath = item.RootDirectory.Root.Name.Replace(":\\", "");
@@ -156,6 +169,39 @@ namespace RemoveUSB
         {
             string strTmp = objStr.ToString();
             RemoveUSB(strTmp);
+        }
+
+        private static List<string> GetAllUsbDriveNames()
+        {
+            var searcher = new ManagementObjectSearcher();
+            searcher.Query = new SelectQuery("Win32_DiskDrive", "InterfaceType = \"USB\"");
+            var usbDiskDrives = searcher.Get().Cast<ManagementObject>();
+            var usBdriveNames = new List<string>();
+            foreach (var usbDiskDrive in usbDiskDrives)
+            {
+                searcher.Query = new SelectQuery("Win32_DiskDriveToDiskPartition");
+                var diskDriveToDiskPartition = searcher.Get().Cast<ManagementObject>();
+
+                searcher.Query = new SelectQuery("Win32_LogicalDiskToPartition");
+                var logicalDiskToPartition = searcher.Get().Cast<ManagementObject>();
+
+                searcher.Query = new SelectQuery("Win32_LogicalDisk");
+                var logicalDisk = searcher.Get().Cast<ManagementObject>();
+
+                var usbPartition =
+                    diskDriveToDiskPartition.First(p => p["Antecedent"].ToString() == usbDiskDrive.ToString())[
+                        "Dependent"].ToString();
+                var usbLogicalDisk =
+                    logicalDiskToPartition.First(p => p["Antecedent"].ToString() == usbPartition)["Dependent"].ToString();
+                foreach (ManagementObject disk in logicalDisk)
+                {
+                    if (disk.ToString() == usbLogicalDisk)
+                    {
+                        usBdriveNames.Add(disk["DeviceID"].ToString());
+                    }
+                }
+            }
+            return usBdriveNames;
         }
     }
 }
