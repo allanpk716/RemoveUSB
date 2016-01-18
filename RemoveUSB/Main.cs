@@ -11,7 +11,7 @@ namespace RemoveUSB
         private static ReuSet reuSet = new ReuSet();
         public List<Result> Query(Query query)
         {
-            return reuSet.Query(query.GetAllRemainingParameter());
+            return reuSet.Query(query.Search);
         }
 
         public void Init(PluginInitContext context)

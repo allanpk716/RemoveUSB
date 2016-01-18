@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Wox\Output\Debug\Plugins\RemoveUSB\</OutputPath>
+    <OutputPath>..\..\Wox-v1.2.0-beta.2\Release\Plugins\RemoveUSB\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -38,6 +38,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Wox.Plugin">
+      <HintPath>..\..\Wox-v1.2.0-beta.2\Release\Wox.Plugin.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -46,10 +49,6 @@
     <Compile Include="ReuSet.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Wox\Wox.Plugin\Wox.Plugin.csproj">
-      <Project>{8451ecdd-2ea4-4966-bb0a-7bbc40138e80}</Project>
-      <Name>Wox.Plugin</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UsbEject\UsbEject.csproj">
       <Project>{e1ccaedd-96ab-4de0-add2-89f43aa65c1f}</Project>
       <Name>UsbEject</Name>
