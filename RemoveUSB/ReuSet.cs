@@ -179,29 +179,140 @@ namespace RemoveUSB
             var usBdriveNames = new List<string>();
             foreach (var usbDiskDrive in usbDiskDrives)
             {
-                searcher.Query = new SelectQuery("Win32_DiskDriveToDiskPartition");
-                var diskDriveToDiskPartition = searcher.Get().Cast<ManagementObject>();
-
-                searcher.Query = new SelectQuery("Win32_LogicalDiskToPartition");
-                var logicalDiskToPartition = searcher.Get().Cast<ManagementObject>();
-
-                searcher.Query = new SelectQuery("Win32_LogicalDisk");
-                var logicalDisk = searcher.Get().Cast<ManagementObject>();
-
-                var usbPartition =
-                    diskDriveToDiskPartition.First(p => p["Antecedent"].ToString() == usbDiskDrive.ToString())[
-                        "Dependent"].ToString();
-                var usbLogicalDisk =
-                    logicalDiskToPartition.First(p => p["Antecedent"].ToString() == usbPartition)["Dependent"].ToString();
-                foreach (ManagementObject disk in logicalDisk)
+                try
                 {
-                    if (disk.ToString() == usbLogicalDisk)
+                    searcher.Query = new SelectQuery("Win32_DiskDriveToDiskPartition");
+	                var diskDriveToDiskPartition = searcher.Get().Cast<ManagementObject>();
+	
+	                searcher.Query = new SelectQuery("Win32_LogicalDiskToPartition");
+	                var logicalDiskToPartition = searcher.Get().Cast<ManagementObject>();
+	
+	                searcher.Query = new SelectQuery("Win32_LogicalDisk");
+	                var logicalDisk = searcher.Get().Cast<ManagementObject>();
+	
+	                var usbPartition =
+	                    diskDriveToDiskPartition.FirstOrDefault(p => p["Antecedent"].ToString() == usbDiskDrive.ToString())[
+	                        "Dependent"].ToString();
+
+                    ManagementObject tmp = null;
+                    /* 
+                         在这里匹配的时候，原来的逻辑是全字符匹配，那么现在遇到一个 DIY U盘
+                         在 usbDiskDrive 读取的时候是 \\PC201306031019\root\cimv2:Win32_DiskPartition.DeviceID="Disk #2, Partition #0"
+                         然后在下面获取所有硬盘的时候却是
+
+                         {\\PC201306031019\root\cimv2:Win32_LogicalDiskToPartition.Antecedent="\\\\PC201306031019\\root\\cimv2:Win32_DiskPartition.DeviceID=\"Disk #2, Partition #1\"",Dependent="\\\\PC201306031019\\root\\cimv2:Win32_LogicalDisk.DeviceID=\"H:\""}
+                         {\\PC201306031019\root\cimv2:Win32_LogicalDiskToPartition.Antecedent="\\\\PC201306031019\\root\\cimv2:Win32_DiskPartition.DeviceID=\"Disk #2, Partition #2\"",Dependent="\\\\PC201306031019\\root\\cimv2:Win32_LogicalDisk.DeviceID=\"I:\""}
+
+                         Partition 从 0 变到了 1 或者 2，当然这个U盘的确分区了2个出来。
+
+                         所以现在需要进行部分匹配，也就是匹配到 Partition 之前的 disk 编号即可
+                         取巧的方式，Partition #0 这个一般人不会分到两位数的盘符吧~~所以移除的时候就不需要用正则表达式了，直接移除固定尾部长度的信息即可
+                    */
+                    // tmp = logicalDiskToPartition.FirstOrDefault(p => p["Antecedent"].ToString() == usbPartition);
+
+                    int indexTmp = usbPartition.LastIndexOf ('P');
+
+                    if (indexTmp == -1)
                     {
-                        usBdriveNames.Add(disk["DeviceID"].ToString());
+                        // 没有找到
+                        continue;
                     }
+
+                    string strTmp = usbPartition.Substring(indexTmp, usbPartition.Length - indexTmp);
+                    usbPartition = usbPartition.Replace(strTmp, "");
+
+                    tmp = logicalDiskToPartition.FirstOrDefault(p => p["Antecedent"].ToString().Contains(usbPartition) == true);
+
+                    if (tmp != null)
+                    {
+                        var usbLogicalDisk = tmp["Dependent"].ToString();
+
+                        foreach (ManagementObject disk in logicalDisk)
+                        {
+                            if (disk.ToString() == usbLogicalDisk)
+                            {
+                                usBdriveNames.Add(disk["DeviceID"].ToString());
+                            }
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    throw;
                 }
             }
             return usBdriveNames;
         }
+
+//         private static List<DriverBase> GetDrivers(InterfaceType type, string partitionName)
+//         {
+//             List<DriverBase> drivers = new List<DriverBase>();
+//             string strQuery = "select * from Win32_DiskDrive";
+//             if (type == InterfaceType.USB)
+//                 strQuery += " Where InterfaceType = 'USB'";
+//             else if (type == InterfaceType.IDE)
+//                 strQuery += " Where InterfaceType = 'IDE'";
+// 
+//             SelectQuery sq = new SelectQuery(strQuery);
+//             ManagementObjectSearcher mos = new ManagementObjectSearcher(sq);
+//             foreach (ManagementObject disk in mos.Get())
+//             {
+//                 string DeviceID = disk["DeviceID"].ToString();
+//                 foreach (ManagementObject partition in new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DeviceID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition").Get())
+//                 {
+//                     string query = "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + partition["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition";
+//                     foreach (ManagementObject disk1 in new ManagementObjectSearcher(query).Get())
+//                     {
+//                         DriverBase b = new DriverBase();
+//                         string diviceID = disk1["DeviceID"].ToString().Trim();
+//                         if (!IsNTFS(diviceID))
+//                         {
+//                             continue;
+//                         }
+//                         string Name = disk1["Name"].ToString().Trim();
+//                         string freeSpace = disk1["FreeSpace"].ToString().Trim();
+//                         string size = disk1["Size"].ToString().Trim();
+//                         if (!string.IsNullOrEmpty(partitionName) && Name.ToUpper() != partitionName.ToUpper())
+//                         {
+//                             continue;
+//                         }
+//                         b.DriverName = Helper.DriverHelper.GetVolumnLabel(diviceID);
+//                         b.TotalSpace = double.Parse(size);
+//                         b.FreeSpace = double.Parse(freeSpace);
+//                         b.DeviceID = diviceID;
+//                         b.IsOverload = (b.TotalSpace - b.FreeSpace) / b.TotalSpace > 0.7;
+//                         b.SerialNum = disk["SerialNumber"] == null ? "" : disk["SerialNumber"].ToString().Trim();
+//                         if (string.IsNullOrEmpty(b.SerialNum))
+//                         {
+//                             string pnpdeviceid = disk["PNPDeviceID"] == null ? "" : disk["PNPDeviceID"].ToString().Trim();
+//                             if (!string.IsNullOrEmpty(pnpdeviceid))
+//                                 b.SerialNum = parseSerialFromDeviceID(pnpdeviceid);
+//                         }
+//                         b.VolumeSerialNum = GetVolumeSerialNumber(diviceID);
+//                         if (!string.IsNullOrEmpty(b.SerialNum))
+//                             drivers.Add(b);
+// 
+//                     }
+//                 }
+//             }
+//             return drivers;
+//         }
+    }
+
+    enum InterfaceType
+    {
+        USB,
+        IDE,
+    }
+
+    class DriverBase
+    {
+        public string DeviceID;
+        public string DriverName;
+        public string VolumeSerialNum;
+        public string TotalSpace;
+        public string FreeSpace;
+        public string IsOverload;
+        public string SerialNum;
     }
 }
