@@ -61,11 +61,7 @@ namespace Yeylol.UsbEject
             string[] serialArray;
             string serial;
             int arrayLen = splitDeviceId.Length - 1;
-
-            serialArray = splitDeviceId[arrayLen].Split('&');
-            serial = serialArray[0];
-
-            return serial;
+            return splitDeviceId[arrayLen]
         }
 
         private string getValueInQuotes(string inValue)
